@@ -113,15 +113,15 @@ killstreak_device := class(creative_device):
     MissileUnload(Player : agent) : void =
         CineMissle.Stop()
         CruiseMissleBlastVFX.Enable()
-        CruiseMissleBlastSFX.Activate()
+        CruiseMissleBlastSFX.Play()
         CruiseExplosive.Explode(Player)
         CruiseExplosive.Reset()
     
     MissileLoad(Player : agent) : void =
         CineMissle.Play()
         HUDControl.Enable()
-        CruiseMissleSFXOne.Activate()
-        CruiseMissleSFXTwo.Activate()
+        CruiseMissleSFXOne.Play()
+        CruiseMissleSFXTwo.Play()
         spawn {MissleKillstreak(Player)}
     
     SentryGunKillStreak(Player: agent)<suspends> : void =
@@ -176,18 +176,27 @@ killstreak_device := class(creative_device):
         TestSequence(Agent)
         Players: []agent := Self.GetPlayspace().GetPlayers()
         var RotationAngle : float = CameraPosition.GetAngle()
+        var RotationAxis : vector3 = CameraPosition.GetAxis()
         loop:
-            set moveYawTest += 1.0
             for (Char -> Index : Players):
                 if (FortChar := Players[Char].GetFortCharacter[]):
                     set CameraPosition = FortChar.GetTransform().Rotation
+                    set RotationAngle = CameraPosition.GetAngle()
                     set PropPosition = FortChar.GetTransform().Translation
-                    var RotationAxis : vector3 = CameraPosition.GetAxis()
-                    if (CameraPosition.GetAngle() )
-                    if (RotationAxis.Y = -0):
-                        Print("Y axis Negative 0")
-                    if (RotationAxis.Z = -0):
-                        Print("Z axis Negative 0")
-                    Print("{CameraPosition}")
-            MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 0.0}, CameraPosition, 0.01)    
-            Sleep(0.1)
+                    set RotationAxis = CameraPosition.GetAxis()
+                    #Mouse movement left and right. When RotationAngle is within 0 - 180 degrees.
+                    if (RotationAxis.X = 0.0 and RotationAxis.Z = 1.0 and RotationAngle <= 180.0):
+                        MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 120.0}, IdentityRotation().ApplyYaw(RotationAngle), 0.001)
+            #Originally used ApplyPitch, next I'm attempting ApplyYaw.
+            #ApplyRoll is moving up when Z is -1 and moving down when Z is 1.
+            #If (Rotation Axis is less than at max (180) then allow movement, otherwise stop movement)
+            
+            #else if (RotationAxis.X = -0 and RotationAxis.Z = -1 and RotationAngle <= 180.0):
+            #    MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 0.0}, IdentityRotation().ApplyRoll(RotationAngle), 0.01)
+            Sleep(0.02)
+
+
+
+#THIS IS WORKING: KEEP
+#if (RotationAxis.X = 0.0 and RotationAxis.Z = 1.0 and RotationAngle <= 180.0):
+#    MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 120.0}, IdentityRotation().ApplyYaw(RotationAngle), 0.001)
