@@ -1,4 +1,3 @@
-
 using { /Fortnite.com/Devices }
 using { /Verse.org/Simulation }
 using { /EpicGames.com/Temporary/UI}
@@ -175,28 +174,37 @@ killstreak_device := class(creative_device):
         var moveYawTest : float = 0.0
         TestSequence(Agent)
         Players: []agent := Self.GetPlayspace().GetPlayers()
-        var RotationAngle : float = CameraPosition.GetAngle()
+        var RotationAngle : vector3 = vector3{}
+        var RotationAngleInit: vector3 = vector3{}
+        
         var RotationAxis : vector3 = CameraPosition.GetAxis()
+        #Will later be renamed to senesitivity and editable property
+        var UpDownPitchAngle : float = 0.00
+        var LeftRightYawAngle : float = 0.00
         loop:
             for (Char -> Index : Players):
                 if (FortChar := Players[Char].GetFortCharacter[]):
-                    set CameraPosition = FortChar.GetTransform().Rotation
-                    set RotationAngle = CameraPosition.GetAngle()
-                    set PropPosition = FortChar.GetTransform().Translation
-                    set RotationAxis = CameraPosition.GetAxis()
-                    #Mouse movement left and right. When RotationAngle is within 0 - 180 degrees.
-                    if (RotationAxis.X = 0.0 and RotationAxis.Z = 1.0 and RotationAngle <= 180.0):
-                        MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 120.0}, IdentityRotation().ApplyYaw(RotationAngle), 0.001)
-            #Originally used ApplyPitch, next I'm attempting ApplyYaw.
-            #ApplyRoll is moving up when Z is -1 and moving down when Z is 1.
-            #If (Rotation Axis is less than at max (180) then allow movement, otherwise stop movement)
-            
-            #else if (RotationAxis.X = -0 and RotationAxis.Z = -1 and RotationAngle <= 180.0):
-            #    MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 0.0}, IdentityRotation().ApplyRoll(RotationAngle), 0.01)
-            Sleep(0.02)
-
-
-
-#THIS IS WORKING: KEEP
-#if (RotationAxis.X = 0.0 and RotationAxis.Z = 1.0 and RotationAngle <= 180.0):
-#    MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 120.0}, IdentityRotation().ApplyYaw(RotationAngle), 0.001)
+                    set RotationAngleInit = FortChar.GetViewRotation().GetAxis()
+                    Sleep(0.00001)
+                    set RotationAngle = FortChar.GetViewRotation().GetAxis()
+                    if (RotationAngleInit.Z > RotationAngle.Z):
+                        if (RotationAngleInit.X > RotationAngle.X):
+                            Print("Move left?")
+                            #Move Left?
+                            set LeftRightYawAngle += 0.1
+                            MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 0.0}, IdentityRotation().ApplyYaw(LeftRightYawAngle), 0.0001)
+                        else if (RotationAngleInit.X < RotationAngle.X):
+                            #Move Right?
+                            Print("Move right?")
+                            set LeftRightYawAngle += 0.1
+                            MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 0.0}, IdentityRotation().ApplyYaw(LeftRightYawAngle), 0.0001)
+                        Print("Aiming up")
+                        set UpDownPitchAngle += 0.1
+                        MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 0.0}, IdentityRotation().ApplyPitch(UpDownPitchAngle), 0.0001)
+                    else if (RotationAngleInit.Z < RotationAngle.Z):
+                        #Add another if statement if moving left angle or right angle change
+                        Print("Aiming down")
+                        set UpDownPitchAngle -= 0.1
+                        MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 0.0}, IdentityRotation().ApplyPitch(UpDownPitchAngle), 0.0001)
+            Sleep(0.00)
+        return
