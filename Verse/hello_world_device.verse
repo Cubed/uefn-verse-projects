@@ -170,41 +170,19 @@ killstreak_device := class(creative_device):
         CineSeqTesting.Play()
     PlayerCameraTesting(Agent: agent)<suspends> : void=
         var CameraPosition : rotation = rotation{}
-        var PropPosition : vector3 = vector3{}
-        var moveYawTest : float = 0.0
         TestSequence(Agent)
         Players: []agent := Self.GetPlayspace().GetPlayers()
-        var RotationAngle : vector3 = vector3{}
-        var RotationAngleInit: vector3 = vector3{}
-        
-        var RotationAxis : vector3 = CameraPosition.GetAxis()
-        #Will later be renamed to senesitivity and editable property
-        var UpDownPitchAngle : float = 0.00
-        var LeftRightYawAngle : float = 0.00
+        var CameraPositionAxis : vector3 = vector3{}
+        var CameraPositionAngle : float = 0.0
+        var CharacterPosition : vector3 = vector3{}
         loop:
             for (Char -> Index : Players):
                 if (FortChar := Players[Char].GetFortCharacter[]):
-                    set RotationAngleInit = FortChar.GetViewRotation().GetAxis()
-                    Sleep(0.00001)
-                    set RotationAngle = FortChar.GetViewRotation().GetAxis()
-                    if (RotationAngleInit.Z > RotationAngle.Z):
-                        if (RotationAngleInit.X > RotationAngle.X):
-                            Print("Move left?")
-                            #Move Left?
-                            set LeftRightYawAngle += 0.1
-                            MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 0.0}, IdentityRotation().ApplyYaw(LeftRightYawAngle), 0.0001)
-                        else if (RotationAngleInit.X < RotationAngle.X):
-                            #Move Right?
-                            Print("Move right?")
-                            set LeftRightYawAngle += 0.1
-                            MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 0.0}, IdentityRotation().ApplyYaw(LeftRightYawAngle), 0.0001)
-                        Print("Aiming up")
-                        set UpDownPitchAngle += 0.1
-                        MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 0.0}, IdentityRotation().ApplyPitch(UpDownPitchAngle), 0.0001)
-                    else if (RotationAngleInit.Z < RotationAngle.Z):
-                        #Add another if statement if moving left angle or right angle change
-                        Print("Aiming down")
-                        set UpDownPitchAngle -= 0.1
-                        MirrorProp.MoveTo(vector3{X := 0.0, Y:= 0.0, Z := 0.0}, IdentityRotation().ApplyPitch(UpDownPitchAngle), 0.0001)
+                    #FortChar.SetVisible(false)
+                    set CameraPosition = FortChar.GetViewRotation()
+                    set CameraPositionAxis = CameraPosition.GetAxis()
+                    set CameraPositionAngle = CameraPosition.GetAngle()
+                    set CharacterPosition = FortChar.GetTransform().Translation
+                    Print("{CameraPosition}")
+                    if (MirrorProp.TeleportTo[vector3{X := CharacterPosition.X + 50.0, Y := CharacterPosition.Y + 50.0, Z := CharacterPosition.Z}, CameraPosition]){}
             Sleep(0.00)
-        return
